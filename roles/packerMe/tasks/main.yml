@@ -1,0 +1,28 @@
+---
+- name: Edit packer variables
+  replace:
+    path: ./roles/packerMe/files/packer.json
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - { regexp: "\"profile\": \".*\"", replace: "\"profile\": \"{{ PROFILE }}\"" }
+    - { regexp: "\"region\": \".*\"", replace: "\"region\": \"{{ REGION }}\"" }
+
+- name: Building AMI
+  command: "{{lookup('file', 'files/call_packer.sh')}}"
+
+- name: Extract AMI ID from manifest
+  shell: 'grep -E -o "ami-\w*" manifest.json | tail -n1'
+  register: result
+
+- debug:
+    msg: "Created AMI: {{ result.stdout }}"
+
+- name: Setup terraform file
+  replace:
+    path: ./terraform/ami.tf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - { regexp: "ami           = \"ami-([^\\s]+)\"", replace: "ami           = \"{{ result.stdout }}\"" }
+    - { regexp: "instance_type = \".*\"", replace: "instance_type = \"{{ INSTANCE_SIZE }}\"" }

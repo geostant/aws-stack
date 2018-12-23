@@ -1,0 +1,10 @@
+---
+- name: Deploy terraform single machine
+  terraform:
+    project_path: 'terraform/'
+    state: present
+    force_init: true
+  register: result
+
+- debug:
+    msg: "{{ result.stdout }}"

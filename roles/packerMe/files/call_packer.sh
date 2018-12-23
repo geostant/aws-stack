@@ -1,0 +1,1 @@
+packer build ./roles/packerMe/files/packer.json

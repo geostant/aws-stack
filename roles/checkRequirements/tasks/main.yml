@@ -1,0 +1,11 @@
+---
+- name: Check if packer installed (boolean output)
+  shell: 'which packer | wc -l'
+  register: isPacker
+
+- fail:
+    msg: "Packer isn't installed on your system"
+  when: isPacker == 0
+
+- debug:
+    msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"
