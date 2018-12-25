@@ -7,5 +7,14 @@
     msg: "Packer isn't installed on your system"
   when: isPacker == 0
 
-- debug:
+- name: Check if terraform.tfvars exists
+  stat:
+    path: ./terraform/terraform.tfvars
+  register: tfvars
+  
+- fail:
+    msg: "terraform.tfvars is misssing"
+  when: tfvars.stat.exists == false
+
+- debug: 
     msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"

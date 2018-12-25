@@ -10,10 +10,21 @@ Cloud stack that uses Anisble to invoke new AMI creation with Packer and Deploym
 
 # Variables
 Variables can be found under `roles/packerMe/vars/main.yml`
-* REGION
-* PROFILE
-* INSTANCE_SIZE
+* AWS_REGION
+* AWS_PROFILE
+* AWS_INSTANCE_SIZE
+* AVAILABILITY_ZONES [list]  << TODO
 
 Overwritting them is simple with flags
 `ansible-playbook -e REGION="xyz" -e PROFILE="zyx"...`
 
+In addition, terraform needs a local file called `./terraform/terraform.tfvars` which will hold your
+personal variables:
+```
+AWS_PROFILE = "..."
+AWS_REGION = "..."
+INSTANCE_SIZE = "..."
+AMIS = {
+    us-east-1 = "...",
+}
+```

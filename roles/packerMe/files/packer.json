@@ -20,6 +20,16 @@
       "ami_name": "packerMe-{{timestamp}}"
     }
   ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "roles/packerMe/files/install_nfs.sh"
+    },
+    {
+      "type": "shell",
+      "script": "roles/packerMe/files/install_docker.sh"
+    }
+  ],
   "post-processors": [
     {
       "type": "manifest",

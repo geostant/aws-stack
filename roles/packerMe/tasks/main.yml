@@ -5,24 +5,34 @@
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
-    - { regexp: "\"profile\": \".*\"", replace: "\"profile\": \"{{ PROFILE }}\"" }
-    - { regexp: "\"region\": \".*\"", replace: "\"region\": \"{{ REGION }}\"" }
+    - { regexp: "\"profile\": \".*\"", replace: "\"profile\": \"{{ AWS_PROFILE }}\"" }
+    - { regexp: "\"region\": \".*\"", replace: "\"region\": \"{{ AWS_REGION }}\"" }
+
+- name: Remove old manifest file
+  file:
+    path: manifest.json
+    state: absent
 
 - name: Building AMI
-  command: "{{lookup('file', 'files/call_packer.sh')}}"
+  command: "{{ lookup('file', 'files/call_packer.sh') }}"
 
-- name: Extract AMI ID from manifest
-  shell: 'grep -E -o "ami-\w*" manifest.json | tail -n1'
-  register: result
+- name: Extract ZONE:AMI_ID from manifest
+  set_fact:
+    ami_id: "{{ lookup('file', 'manifest.json') | from_json | json_query('builds[].artifact_id')}}"
 
-- debug:
-    msg: "Created AMI: {{ result.stdout }}"
+- name: State new AMI ID
+  debug:
+    msg: "Created AMI: {{ ami_id[0].split(':')[1] }}"
 
 - name: Setup terraform file
   replace:
-    path: ./terraform/ami.tf
+    path: ./terraform/terraform.tfvars
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
-    - { regexp: "ami           = \"ami-([^\\s]+)\"", replace: "ami           = \"{{ result.stdout }}\"" }
-    - { regexp: "instance_type = \".*\"", replace: "instance_type = \"{{ INSTANCE_SIZE }}\"" }
+    - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
+    - { regexp: "INSTANCE_SIZE = \".*\"", replace: "INSTANCE_SIZE = \"{{ AWS_INSTANCE_SIZE }}\"" }
+    - { regexp: "AWS_PROFILE = \".*\"", replace: "AWS_PROFILE = \"{{ AWS_PROFILE }}\"" }
+    - { regexp: "AWS_REGION = \".*\"", replace: "AWS_REGION = \"{{ AWS_REGION }}\"" }
+    # TODO:
+    # - { regexp: "availability_zones   = \\[.*\\]\"", replace: "availability_zones   = \\[{{ AVAILABILITY_ZONES }}\\]\"" }

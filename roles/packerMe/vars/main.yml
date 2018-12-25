@@ -1,4 +1,4 @@
 ---
-REGION: "us-east-1"
-PROFILE: "ecdev"
-INSTANCE_SIZE: "t2.micro"
+AWS_REGION: "us-east-1"
+AWS_PROFILE: "default"
+AWS_INSTANCE_SIZE: "t2.micro"
