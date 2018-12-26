@@ -24,6 +24,7 @@ State a valid EC2 instance size (default: `t2.micro`)
 #### AVAILABILITY_ZONES [list]  << TODO
 Not yet supported, a list of valid AWS AZ based on the working `AWS_REGION`
 <br><br>
+TODO:
 #### SKIP_PACKER
 Use this variable (Boolean) to skip creating a new AMI and jump straight to spinning a new environment (Default: `false`)<br>
 **Make sure that your AMI ID is set correctly in terraform**
@@ -32,13 +33,15 @@ Overwritting them is simple with flags
 `ansible-playbook -e REGION="xyz" -e PROFILE="zyx"...`
 <br><br>
 # In addition
-**TODO:** Dynamic creation using ansible<br> 
 Terraform needs a local file called `./terraform/terraform.tfvars` which will hold your
-personal variables:
+personal variables.
+
+If the file is absent, ansible will create one for you:
 ```
 AWS_PROFILE = "..."
 AWS_REGION = "..."
-INSTANCE_SIZE = "..."
+AWS_INSTANCE_SIZE = "..."
+AWS_AVAILABILITY_ZONES = "...,...,..."
 AMIS = {
     us-east-1 = "...",
 }
