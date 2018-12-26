@@ -1,0 +1,1 @@
+install -d -m 0700 -o $(whoami) -g $(whoami) /mnt/data/elastic

@@ -1,0 +1,53 @@
+---
+- debug:
+    msg: "terraform.tfvars will auto populate ONLY if it doesnt' exists!"
+
+- name: Checking if terraform.tfvars exists
+  stat:
+    path: ./terraform/terraform.tfvars
+  register: tfvars
+
+- name: Creating terraform.tfvars
+  file:
+    path: ./terraform/terraform.tfvars
+    state: touch
+  when: tfvars.stat.exists == false
+
+- name: Validaing lines in terraform.tfvars
+  lineinfile:
+    path: ./terraform/terraform.tfvars
+    regex: '^AWS_PROFILE = ".*"'
+    insertbefore: 'BOF'
+    line: 'AWS_PROFILE = "{{ AWS_PROFILE }}"'
+  when: tfvars.stat.exists == false
+
+- name: Validaing lines in terraform.tfvars
+  lineinfile:
+    path: ./terraform/terraform.tfvars
+    insertafter: "{{ item.insertafter }}"
+    line: "{{ item.line }}"
+  loop:
+    - { insertafter: '^AWS_PROFILE = ".*"', line: 'AWS_REGION = "{{ AWS_REGION }}"' }
+    - { insertafter: '^AWS_REGION = ".*"', line: 'AWS_INSTANCE_SIZE = "{{ AWS_INSTANCE_SIZE }}"' }
+    - { insertafter: '^AWS_INSTANCE_SIZE = ".*"', line: 'AMIS = {' }
+    - { insertafter: 'EOF', line: '}' }
+  when: tfvars.stat.exists == false
+
+- name: Get AWS regions RAW
+  shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-regions'
+  register: regions_out
+  when: tfvars.stat.exists == false
+
+- set_fact:
+    regions: "{{ regions_out.stdout | from_json }}"
+
+- name: Populate regions in terraform.tfvars
+  lineinfile:
+    path: ./terraform/terraform.tfvars
+    insertafter: '^AMIS = {'
+    line: "    {{ item }} = \"ami-...\""
+  loop: "{{ regions | json_query('Regions[*].RegionName') }}"
+  when: tfvars.stat.exists == false
+
+# TODO: 
+#   aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-availability-zones
