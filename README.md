@@ -30,7 +30,7 @@ Use this variable (Boolean) to skip creating a new AMI and jump straight to spin
 **Make sure that your AMI ID is set correctly in terraform**
 
 Overwritting them is simple with flags
-`ansible-playbook -e REGION="xyz" -e PROFILE="zyx"...`
+`ansible-playbook -e AWS_REGION="xyz" -e AWS_PROFILE="zyx"...`
 <br><br>
 # In addition
 Terraform needs a local file called `./terraform/terraform.tfvars` which will hold your
