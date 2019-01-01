@@ -5,7 +5,7 @@ resource "aws_key_pair" "mykey" {
 
 resource "aws_launch_configuration" "packerMe-ALC" {
   name_prefix            = "packerMe-"
-  image_id               = "${lookup(var.AMIS, var.AWS_REGION)}"
+  image_id               = "${var.AMI_ID}"
   key_name               = "${aws_key_pair.mykey.key_name}"
   instance_type          = "${var.AWS_INSTANCE_SIZE}"
   security_groups        = ["${aws_security_group.allow-ssh.id}"]

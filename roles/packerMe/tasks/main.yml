@@ -1,20 +1,21 @@
 ---
-- name: Edit packer variables
-  replace:
-    path: ./roles/packerMe/files/packer.json
-    regexp: "{{ item.regexp }}"
-    replace: "{{ item.replace }}"
-  with_items:
-    - { regexp: "\"profile\": \".*\"", replace: "\"profile\": \"{{ AWS_PROFILE }}\"" }
-    - { regexp: "\"region\": \".*\"", replace: "\"region\": \"{{ AWS_REGION }}\"" }
+- name: Checking if variables.json exist
+  stat:
+    path: variables.json
+  register: variables
 
-- name: Remove old manifest file
+- name: Load vars
+  include_vars:
+    file: variables.json
+  when: variables.stat.exists
+
+- name: Remove old manifest file (if exist)
   file:
     path: manifest.json
     state: absent
-
+  
 - name: Building AMI
-  command: "{{ lookup('file', 'files/call_packer.sh') }}"
+  shell: "{{ lookup('file', 'files/call_packer.sh') }}"
 
 - name: Extract ZONE:AMI_ID from manifest
   set_fact:
@@ -26,13 +27,22 @@
 
 - name: Setup terraform file
   replace:
-    path: ./terraform/terraform.tfvars
+    path: variables.json
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
-    - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
-    - { regexp: "INSTANCE_SIZE = \".*\"", replace: "INSTANCE_SIZE = \"{{ AWS_INSTANCE_SIZE }}\"" }
-    - { regexp: "AWS_PROFILE = \".*\"", replace: "AWS_PROFILE = \"{{ AWS_PROFILE }}\"" }
-    - { regexp: "AWS_REGION = \".*\"", replace: "AWS_REGION = \"{{ AWS_REGION }}\"" }
-    # TODO:
-    # - { regexp: "availability_zones   = \\[.*\\]\"", replace: "availability_zones   = \\[{{ AVAILABILITY_ZONES }}\\]\"" }
+    - { regexp: "    \"AMI_ID\".*", replace: "    \"AMI_ID\": \"{{ ami_id[0].split(':')[1] }}\"" }
+    # - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
+
+# TODO: Future use
+# - name: Setup terraform file
+#   replace:
+#     path: roles/terraformDeploy/files/terraform.tfvars
+#     regexp: "{{ item.regexp }}"
+#     replace: "{{ item.replace }}"
+#   with_items:
+#     - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
+#     - { regexp: "INSTANCE_SIZE = \".*\"", replace: "INSTANCE_SIZE = \"{{ AWS_INSTANCE_SIZE }}\"" }
+#     - { regexp: "AWS_PROFILE = \".*\"", replace: "AWS_PROFILE = \"{{ AWS_PROFILE }}\"" }
+#     - { regexp: "AWS_REGION = \".*\"", replace: "AWS_REGION = \"{{ AWS_REGION }}\"" }
+#     - { regexp: "availability_zones   = \\[.*\\]\"", replace: "availability_zones   = \\[{{ AWS_AVAILABILITY_ZONES }}\\]\"" }

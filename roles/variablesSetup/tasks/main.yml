@@ -1,66 +1,105 @@
 ---
-- debug:
-    msg: "terraform.tfvars will auto populate ONLY if it doesnt' exists!"
+- name: Deleting variables.json
+  file:
+    path: variables.json
+    state: absent
+  when: variables_delete == 'yes'
 
-- name: Checking if terraform.tfvars exists
+- name: Checking if variables.json exist
   stat:
-    path: ./terraform/terraform.tfvars
+    path: variables.json
+  register: variables
+
+- name: Load vars
+  include_vars:
+    file: variables.json
+  when: variables.stat.exists
+
+- debug:
+    msg: "variables.json exist, NOT going to populate the file or overwrite variables"
+  when: variables.stat.exists
+
+- name: Checking if terraform.tfvars exist
+  stat:
+    path: roles/terraformDeploy/files/terraform.tfvars
   register: tfvars
 
-- name: Creating terraform.tfvars
-  file:
-    path: ./terraform/terraform.tfvars
-    state: touch
-  when: tfvars.stat.exists == false
-
-- name: Validaing lines in terraform.tfvars
-  lineinfile:
-    path: ./terraform/terraform.tfvars
-    regex: '^AWS_PROFILE = ".*"'
-    insertbefore: 'BOF'
-    line: 'AWS_PROFILE = "{{ AWS_PROFILE }}"'
-  when: tfvars.stat.exists == false
-
-- name: Validaing lines in terraform.tfvars
-  lineinfile:
-    path: ./terraform/terraform.tfvars
-    insertafter: "{{ item.insertafter }}"
-    line: "{{ item.line }}"
-  loop:
-    - { insertafter: '^AWS_PROFILE = ".*"', line: 'AWS_REGION = "{{ AWS_REGION }}"' }
-    - { insertafter: '^AWS_REGION = ".*"', line: 'AWS_INSTANCE_SIZE = "{{ AWS_INSTANCE_SIZE }}"' }
-    - { insertafter: '^AWS_INSTANCE_SIZE = ".*"', line: 'AWS_AVAILABILITY_ZONES = "..."' }
-    - { insertafter: '^AWS_AVAILABILITY_ZONES = ".*"', line: 'AMIS = {' }
-    - { insertafter: 'EOF', line: '}' }
-  when: tfvars.stat.exists == false
+- debug:
+    msg: "terraform.tfvars exist, NOT going to populate the file or overwrite variables"
+  when: tfvars.stat.exists
 
 - name: Get AWS regions
   shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-regions'
   register: regions_out
-  when: tfvars.stat.exists == false
 
 - name: Get AWS availability zones
   shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-availability-zones'
   register: zones_out
-  when: tfvars.stat.exists == false
 
 - set_fact:
     regions: "{{ regions_out.stdout | from_json }}"
     zones: "{{ zones_out.stdout | from_json }}"
-  when: tfvars.stat.exists == false
 
-- name: Populate regions in terraform.tfvars
+- name: Creating variables.json
+  file:
+    path: variables.json
+    state: touch
+  when: not variables.stat.exists
+
+- name: Creating terraform.tfvars
+  file:
+    path: roles/terraformDeploy/files/terraform.tfvars
+    state: touch
+  when: not tfvars.stat.exists
+  
+- name: Populating variables.json
   lineinfile:
-    path: ./terraform/terraform.tfvars
-    insertafter: '^AMIS = {'
-    line: "    {{ item }} = \"ami-...\""
-  loop: "{{ regions | json_query('Regions[*].RegionName') }}"
-  when: tfvars.stat.exists == false
+    path: variables.json
+    insertbefore: 'BOF'
+    line: '{'
+  when: not variables.stat.exists
 
-- name: Populate zones in terraform.tfvars
+- name: Populating variables.json
   lineinfile:
-    path: ./terraform/terraform.tfvars
-    regex: "^AWS_AVAILABILITY_ZONES = \".*\""
-    line: "AWS_AVAILABILITY_ZONES = \"{{ zones | json_query('AvailabilityZones[*].ZoneName') | join(',') }}\""
-  when: tfvars.stat.exists == false
+    path: variables.json
+    line: "{{ item.line }}"
+  with_items:
+    - { line: '    "AWS_PROFILE": "{{ AWS_PROFILE }}",' }
+    - { line: '    "AWS_REGION": "{{ AWS_REGION }}",' }
+    - { line: "    \"AWS_AVAILABILITY_ZONES\": \"{{ zones | json_query('AvailabilityZones[*].ZoneName') | join(',') }}\"," }
+    - { line: '    "AWS_INSTANCE_SIZE": "{{ AWS_INSTANCE_SIZE }}",' }
+    - { line: '    "SSH_USER": "ubuntu",' }
+    - { line: '    "AMI_NAME": "{{ AMI_NAME }}",'}
+    - { line: '    "AMI_ID": "..."' }
+    - { line: '}' }
+  when: not variables.stat.exists
 
+# TODO: For future use... 
+# - name: Populate regions in terraform.tfvars
+#   lineinfile:
+#     path: variables.json
+#     insertafter: '^    "AMIS":'
+#     line: '        { "{{ item }}": "ami-..." },'
+#   loop: "{{ regions | json_query('Regions[*].RegionName') }}"
+#   when: not variables.stat.exists
+
+# - name: Populating terraform.tfvars
+#   lineinfile:
+#     path: roles/terraformDeploy/files/terraform.tfvars
+#     regex: '^AWS_PROFILE = ".*"'
+#     insertbefore: 'BOF'
+#     line: 'AWS_PROFILE = "{{ AWS_PROFILE }}"'
+#   when: not tfvars.stat.exists
+
+# - name: Populating terraform.tfvars
+#   lineinfile:
+#     path: roles/terraformDeploy/files/terraform.tfvars
+#     insertafter: "{{ item.insertafter }}"
+#     line: "{{ item.line }}"
+#   loop:
+#     - { insertafter: '^AWS_PROFILE = ".*"', line: 'AWS_REGION = "{{ AWS_REGION }}"' }
+#     - { insertafter: '^AWS_REGION = ".*"', line: 'AWS_INSTANCE_SIZE = "{{ AWS_INSTANCE_SIZE }}"' }
+#     - { insertafter: '^AWS_INSTANCE_SIZE = ".*"', line: "AWS_AVAILABILITY_ZONES = \"{{ zones | json_query('AvailabilityZones[*].ZoneName') | join(',') }}\"" }
+#     - { insertafter: '^AWS_AVAILABILITY_ZONES = ".*"', line: 'AMIS = {' }
+#     - { insertafter: 'EOF', line: '}' }
+#   when: not tfvars.stat.exists

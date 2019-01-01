@@ -2,8 +2,8 @@
   "builders": [
     {
       "type": "amazon-ebs",
-      "profile": "ecdev",
-      "region": "us-east-1",
+      "profile": "{{ user `AWS_PROFILE` }}",
+      "region": "{{ user `AWS_REGION` }}",
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
@@ -15,9 +15,9 @@
         ],
         "most_recent": true
       },
-      "instance_type": "t2.micro",
+      "instance_type": "{{ user `AWS_INSTANCE_SIZE` }}",
       "ssh_username": "ubuntu",
-      "ami_name": "packerMe-{{timestamp}}"
+      "ami_name": "{{ user `AMI_NAME` }}-dev-{{timestamp}}"
     }
   ],
   "provisioners": [
@@ -30,6 +30,13 @@
       "script": "roles/packerMe/files/install_docker.sh"
     }
   ],
+  "variables": {
+      "AMI_NAME": "{{ env `AMI_NAME` }}",
+      "AWS_REGION": "{{ env `AWS_REGION` }}",
+      "AWS_PROFILE": "{{ env `AWS_PROFILE` }}",
+      "AWS_INSTANCE_SIZE": "{{ env `AWS_INSTANCE_SIZE` }}",
+      "SSH_USER": "{{ env `SSH_USER` }}"
+  },
   "post-processors": [
     {
       "type": "manifest",

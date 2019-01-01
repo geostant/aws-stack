@@ -1,6 +1,12 @@
 - hosts: localhost
+  vars_prompt:
+    - name: "variables_delete"
+      prompt: "Shall I delete variables.json?"
+      default: "yes"
+      private: "no"
+  
   roles:
-     - checkRequirements
-     - variablesSetup
-     - packerMe
+    #  - checkRequirements
+    #  - variablesSetup
+    #  - packerMe
      - terraformDeploy

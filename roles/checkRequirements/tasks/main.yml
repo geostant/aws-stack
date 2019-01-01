@@ -2,19 +2,12 @@
 - name: Check if packer installed (boolean output)
   shell: 'which packer | wc -l'
   register: isPacker
+  failed_when: "'0' in isPacker.stdout"
 
-- fail:
-    msg: "Packer isn't installed on your system"
-  when: isPacker == 0
-
-- name: Check if terraform.tfvars exists
-  stat:
-    path: ./terraform/terraform.tfvars
-  register: tfvars
-  
-- fail:
-    msg: "terraform.tfvars is misssing"
-  when: tfvars.stat.exists == false
+- name: Check if terraform installed (boolean output)
+  shell: 'which terraform | wc -l'
+  register: isTerraform
+  failed_when: "'0' in isTerraform.stdout"
 
 - debug: 
     msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"

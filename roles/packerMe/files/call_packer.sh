@@ -1,1 +1,1 @@
-packer build ./roles/packerMe/files/packer.json
+packer build -var-file variables.json ./roles/packerMe/files/packer.json
