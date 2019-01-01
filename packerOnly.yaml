@@ -6,7 +6,6 @@
       private: "no"
   
   roles:
-    #  - checkRequirements
-    #  - variablesSetup
-    #  - packerMe
-     - terraformDeploy
+     - checkRequirements
+     - variablesSetup
+     - packerMe

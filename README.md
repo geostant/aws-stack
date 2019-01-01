@@ -32,6 +32,10 @@ Variables are being set and read form `variables.json` in the root diretory of t
     --------
     Default SSH username to be used to access the deployed machines [at the moment ALWAYS `ubuntu`]
     
+    AWS_OWNER_ID
+    ------------
+    To be able to perform CRUD operations, the ID is needed
+    
     AMI_NAME
     --------
     Prefix to packer created AMI [template: `AMI_NAME-dev-{timestamp}`]
@@ -47,12 +51,10 @@ Variables are being set and read form `variables.json` in the root diretory of t
     TODO: SKIP_PACKER [boolean]
     -----------------
     Use this variable to skip creating a new AMI and jump straight to spinning a new environment (Default: `false`)
-    
-    Make sure that variables.json have all the proper variables set
 
 Overwritting them is simple with flags (make sure that you input `yes` or provide flag for variables.json delete): `ansible-playbook -e AWS_REGION="xyz" -e AWS_PROFILE="zyx"...`
 <br><br>
-Packer needs a local file called `./variables.json` which will hold your environment GLOBAL variables (shared between ansible and packer TODO: add terraform)
+Packer needs a local file called `{PROJECT_ROOT}/variables.json` which will hold your environment **GLOBAL** variables (shared between ansible, packer add terraform)
 
 If the file is absent, ansible will create one for you:
 ```
@@ -62,6 +64,7 @@ If the file is absent, ansible will create one for you:
     "AWS_AVAILABILITY_ZONES": "...,...,...",
     "AWS_INSTANCE_SIZE": "...",
     "SSH_USER": "ubuntu",
+    "AWS_OWNER_ID": "...",
     "AMI_NAME": "...",
     "AMI_ID": "ami-..."
 }

@@ -17,7 +17,11 @@
       },
       "instance_type": "{{ user `AWS_INSTANCE_SIZE` }}",
       "ssh_username": "ubuntu",
-      "ami_name": "{{ user `AMI_NAME` }}-dev-{{timestamp}}"
+      "ami_name": "{{ user `AMI_NAME` }}-dev-{{timestamp}}",
+      "tags": {
+        "Release": "Latest",
+        "Builder": "packerMe"
+      }
     }
   ],
   "provisioners": [

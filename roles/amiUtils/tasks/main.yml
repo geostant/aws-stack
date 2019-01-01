@@ -1,0 +1,62 @@
+---
+- name: Checking if variables.json exist
+  stat:
+    path: variables.json
+  register: variables
+  tags:
+    - always
+
+- name: Load vars
+  include_vars:
+    file: variables.json
+  when: variables.stat.exists
+  tags:
+    - always
+
+- name: List AMIs
+  shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-images --filters "Name=tag:Builder,Values=packerMe" --filters "Name=owner-id,Values={{ AWS_OWNER_ID }}"'
+  register: amis
+  tags:
+    - getAmis
+    - never
+
+- debug:
+    msg: "{{ amis.stdout }}"
+  tags:
+    - getAmis
+    - never
+
+- name: List snapshots
+  shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-snapshots --filters "Name=tag:Builder,Values=packerMe" --filters "Name=owner-id,Values={{ AWS_OWNER_ID }}"'
+  register: snapshots
+  tags:
+    - getSnapshots
+    - never
+
+- debug:
+    msg: "{{ snapshots.stdout }}"
+  tags:
+    - getSnapshots
+    - never
+
+- name: Gather info on AMI
+  shell: 'aws --output json --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-images --image-ids {{ AMI }}'
+  register: ami_out
+  tags:
+    - deleteAMI
+    - never
+
+- set_fact:
+    snapshot: "{{ ami_out.stdout | from_json }}"
+  tags:      
+    - deleteAMI
+    - never
+
+- name: Delete AMI by ID + Relevant Snapshot
+  shell: |
+    aws --profile={{ AWS_PROFILE }} --region={{ AWS_REGION }} ec2 deregister-image --image-id {{ AMI }}
+    sleep 5
+    aws --profile={{ AWS_PROFILE }} --region={{ AWS_REGION }} ec2 delete-snapshot --snapshot-id {{ snapshot | json_query("Images[*].BlockDeviceMappings[*].Ebs.SnapshotId") | string  | regex_search('snap-\w+') }}
+  tags:
+    - deleteAMI
+    - never

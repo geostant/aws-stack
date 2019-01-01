@@ -69,6 +69,7 @@
     - { line: "    \"AWS_AVAILABILITY_ZONES\": \"{{ zones | json_query('AvailabilityZones[*].ZoneName') | join(',') }}\"," }
     - { line: '    "AWS_INSTANCE_SIZE": "{{ AWS_INSTANCE_SIZE }}",' }
     - { line: '    "SSH_USER": "ubuntu",' }
+    - { line: '    "AWS_OWNER_ID": "{{ AWS_OWNER_ID }}",' }
     - { line: '    "AMI_NAME": "{{ AMI_NAME }}",'}
     - { line: '    "AMI_ID": "..."' }
     - { line: '}' }
