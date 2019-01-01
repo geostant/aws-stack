@@ -46,25 +46,11 @@ Variables are being set and read form `variables.json` in the root diretory of t
     
     TODO: SKIP_PACKER [boolean]
     -----------------
-    Use this variable to skip creating a new AMI and jump straight to spinning a new environment (Default: `false`)<br>
-    **Make sure that your AMI ID is set correctly in terraform**
+    Use this variable to skip creating a new AMI and jump straight to spinning a new environment (Default: `false`)
+    
+    Make sure that variables.json have all the proper variables set
 
-Overwritting them is simple with flags
-`ansible-playbook -e AWS_REGION="xyz" -e AWS_PROFILE="zyx"...`
-<br><br>
-Terraform needs a local file called `roles/terraformDeploy/files/terraform.tfvars` which will hold your
-personal variables.
-
-If the file is absent, ansible will create one for you:
-```
-AWS_PROFILE = "..."
-AWS_REGION = "..."
-AWS_INSTANCE_SIZE = "..."
-AWS_AVAILABILITY_ZONES = "...,...,..."
-AMIS = {
-    us-east-1 = "...",
-}
-```
+Overwritting them is simple with flags (make sure that you input `yes` or provide flag for variables.json delete): `ansible-playbook -e AWS_REGION="xyz" -e AWS_PROFILE="zyx"...`
 <br><br>
 Packer needs a local file called `./variables.json` which will hold your environment GLOBAL variables (shared between ansible and packer TODO: add terraform)
 
@@ -76,6 +62,8 @@ If the file is absent, ansible will create one for you:
     "AWS_AVAILABILITY_ZONES": "...,...,...",
     "AWS_INSTANCE_SIZE": "...",
     "SSH_USER": "ubuntu",
-    "AMI_NAME": "..."
+    "AMI_NAME": "...",
+    "AMI_ID": "ami-..."
 }
+
 ```
