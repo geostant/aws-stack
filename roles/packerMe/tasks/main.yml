@@ -31,4 +31,4 @@
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
-    - { regexp: "    \"AMI_ID\".*", replace: "    \"AMI_ID\": \"{{ ami_id[0].split(':')[1] }}\"" }
+    - { regexp: "    \"AMI_ID\".*", replace: "    \"AMI_ID\": \"{{ ami_id[0].split(':')[1] }}\"," }
