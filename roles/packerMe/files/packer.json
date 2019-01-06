@@ -27,12 +27,12 @@
   ],
   "provisioners": [
     {
-      "type": "shell",
-      "script": "roles/packerMe/files/install_nfs.sh"
+      "type": "ansible",
+      "playbook_file": "roles/packerMe/files/install_python.yaml"
     },
     {
-      "type": "shell",
-      "script": "roles/packerMe/files/install_docker.sh"
+      "type": "ansible",
+      "playbook_file": "roles/packerMe/files/install_nfs.yaml"
     }
   ],
   "variables": {

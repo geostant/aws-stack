@@ -120,6 +120,8 @@
     - { line: '    "AMI_ID": "...",' }
     - { line: '    "SRC_AMI_NAME": "{{ SRC_AMI_NAME }}",'}
     - { line: '    "SRC_AMI_ID": "{{ SRC_AMI_ID }}",' }
-    - { line: '    "SRC_AMI_OWNER_ID": "{{ SRC_AMI_OWNER_ID }}"' }
+    - { line: '    "SRC_AMI_OWNER_ID": "{{ SRC_AMI_OWNER_ID }}",' }
+    - { line: '    "OS_FAMILY": "{{ OS_FAMILY }}",' }
+    - { line: '    "OS_VERSION": "{{ OS_VERSION }}"' }
     - { line: '}' }
   when: not variables.stat.exists

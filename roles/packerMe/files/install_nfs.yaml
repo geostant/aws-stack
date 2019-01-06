@@ -1,0 +1,13 @@
+- hosts: localhost
+  tasks:
+  - name: install nfs (RedHat)
+    package:
+      name: nfs-utils
+      state: present
+    when: "'RedHat' in ansible_os_family"
+
+  - name: install nfs (RedHat)
+    package:
+      name: nfs-common
+      state: present
+    when: "'Debian' in ansible_os_family"
