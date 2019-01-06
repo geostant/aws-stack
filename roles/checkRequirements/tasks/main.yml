@@ -1,4 +1,14 @@
 ---
+- name: Checking if variables.json exist
+  stat:
+    path: variables.json
+  register: variables
+
+- name: Load vars
+  include_vars:
+    file: variables.json
+  when: variables.stat.exists
+
 - name: Check if packer installed (boolean output)
   shell: 'which packer | wc -l'
   register: isPacker
@@ -8,6 +18,17 @@
   shell: 'which terraform | wc -l'
   register: isTerraform
   failed_when: "'0' in isTerraform.stdout"
+
+- name: "Ensure required variables are set"
+  fail:
+    msg: "The {{item}} variable is not defined"
+  when: vars[item] is undefined
+  loop:
+  - AWS_REGION
+  - AWS_PROFILE
+  - AWS_INSTANCE_SIZE
+  - AWS_OWNER_ID
+  - AMI_NAME
 
 - debug: 
     msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"
