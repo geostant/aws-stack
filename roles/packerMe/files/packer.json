@@ -19,7 +19,8 @@
       "ssh_username": "{{ user `SSH_USER` }}",
       "ami_name": "{{ user `AMI_NAME` }}-dev-{{timestamp}}",
       "tags": {
-        "Release": "Latest",
+        "OS_FAMILY": "{{ user `OS_FAMILY` }}",
+        "OS_VERSION": "{{ user `OS_VERSION` }}",
         "Builder": "packerMe"
       }
     }
@@ -41,7 +42,9 @@
     "AWS_INSTANCE_SIZE": "{{ env `AWS_INSTANCE_SIZE` }}",
     "SRC_AMI_NAME": "{{ env `SRC_AMI_NAME` }}",
     "SRC_AMI_OWNER_ID": "{{ env `SRC_AMI_OWNER_ID` }}",
-    "SSH_USER": "{{ env `SSH_USER` }}"
+    "SSH_USER": "{{ env `SSH_USER` }}",
+    "OS_FAMILY": "{{ env `OS_FAMILY` }}",
+    "OS_VERSION": "{{ env `OS_VERSION` }}"
   },
   "post-processors": [
     {
