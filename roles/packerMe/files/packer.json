@@ -7,16 +7,16 @@
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
-          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "name": "{{ user `SRC_AMI_NAME` }}",
           "root-device-type": "ebs"
         },
         "owners": [
-          "099720109477"
+          "{{ user `SRC_AMI_OWNER_ID` }}"
         ],
         "most_recent": true
       },
       "instance_type": "{{ user `AWS_INSTANCE_SIZE` }}",
-      "ssh_username": "ubuntu",
+      "ssh_username": "{{ user `SSH_USER` }}",
       "ami_name": "{{ user `AMI_NAME` }}-dev-{{timestamp}}",
       "tags": {
         "Release": "Latest",
@@ -35,11 +35,13 @@
     }
   ],
   "variables": {
-      "AMI_NAME": "{{ env `AMI_NAME` }}",
-      "AWS_REGION": "{{ env `AWS_REGION` }}",
-      "AWS_PROFILE": "{{ env `AWS_PROFILE` }}",
-      "AWS_INSTANCE_SIZE": "{{ env `AWS_INSTANCE_SIZE` }}",
-      "SSH_USER": "{{ env `SSH_USER` }}"
+    "AMI_NAME": "{{ env `AMI_NAME` }}",
+    "AWS_REGION": "{{ env `AWS_REGION` }}",
+    "AWS_PROFILE": "{{ env `AWS_PROFILE` }}",
+    "AWS_INSTANCE_SIZE": "{{ env `AWS_INSTANCE_SIZE` }}",
+    "SRC_AMI_NAME": "{{ env `SRC_AMI_NAME` }}",
+    "SRC_AMI_OWNER_ID": "{{ env `SRC_AMI_OWNER_ID` }}",
+    "SSH_USER": "{{ env `SSH_USER` }}"
   },
   "post-processors": [
     {
@@ -47,5 +49,5 @@
       "output": "manifest.json",
       "strip_path": true
     }
-    ]
+  ]
 }

@@ -1,4 +1,10 @@
 ---
+- name: Deleting variables.json
+  file:
+    path: variables.json
+    state: absent
+  when: variables_delete == 'yes'
+
 - name: Checking if variables.json exist
   stat:
     path: variables.json
@@ -29,6 +35,9 @@
   - AWS_INSTANCE_SIZE
   - AWS_OWNER_ID
   - AMI_NAME
+  - SSH_USER
+  - OS_FAMILY
+  - OS_VERSION
 
 - debug: 
     msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"

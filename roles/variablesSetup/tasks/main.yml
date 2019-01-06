@@ -1,10 +1,4 @@
 ---
-- name: Deleting variables.json
-  file:
-    path: variables.json
-    state: absent
-  when: variables_delete == 'yes'
-
 - name: Checking if variables.json exist
   stat:
     path: variables.json
@@ -40,6 +34,73 @@
     regions: "{{ regions_out.stdout | from_json }}"
     zones: "{{ zones_out.stdout | from_json }}"
 
+- name: get (ubuntu)
+  shell: |
+    aws \
+    --profile="{{ AWS_PROFILE }}" \
+    --region="{{ AWS_REGION }}" \
+    ec2 describe-images \
+    --filters \
+      "Name=virtualization-type, Values=hvm" \
+      "Name=architecture, Values=x86_64" \
+      "Name=is-public, Values=true" \
+      "Name=image-type, Values=machine" \
+      "Name=name, Values=*{{ OS_FAMILY | lower }}/images/*{{ OS_VERSION }}*" \
+      "Name=description, Values=*LTS*" \
+      "Name=root-device-type, Values=ebs" \
+    --query 'sort_by(Images, &CreationDate)[].Name' \
+    --owner="099720109477"
+  when: "'ubuntu'|lower in OS_FAMILY|lower"
+  register: ubuntu_results
+
+- set_fact:
+    SRC_AMI_NAME: "{{ ubuntu_results.stdout | from_json | json_query ('[-1]') }}"
+    SRC_AMI_OWNER_ID: "099720109477"
+  when: "'ubuntu'|lower in OS_FAMILY|lower"
+
+- name: get (redhat)
+  shell: |
+    aws \
+      --profile="{{ AWS_PROFILE }}" \
+      --region="{{ AWS_REGION }}" \
+    ec2 describe-images \
+    --filters \
+      "Name=virtualization-type, Values=hvm" \
+      "Name=architecture, Values=x86_64" \
+      "Name=is-public, Values=true" \
+      "Name=image-type, Values=machine" \
+      "Name=name, Values=*{{ OS_FAMILY |upper }}-{{ OS_VERSION }}_HVM-*" \
+      "Name=root-device-type, Values=ebs" \
+    --query 'sort_by(Images, &CreationDate)[].Name' \
+    --owner="309956199498"
+  when: "'RHEL'|upper in OS_FAMILY|upper"
+  register: redhat_results
+
+- set_fact:
+    SRC_AMI_NAME: "{{ redhat_results.stdout | from_json | json_query ('[-1]') }}"
+    SRC_AMI_OWNER_ID: "309956199498"
+  when: "'RHEL'|upper in OS_FAMILY|upper"
+
+- debug:
+    msg: "{{ SRC_AMI_NAME }}"
+
+- name: get II
+  shell: |
+    aws \
+      --profile="{{ AWS_PROFILE }}" \
+      --region="{{ AWS_REGION }}" \
+    ec2 describe-images \
+    --filters \
+      "Name=name, Values={{ SRC_AMI_NAME }}" \
+    --query 'Images[*].ImageId'
+  register: results
+
+- set_fact:
+    SRC_AMI_ID: "{{ lookup('flattened', results.stdout | from_json ) }}"
+
+- debug:
+    msg: "{{ SRC_AMI_ID }}"
+
 - name: Creating variables.json
   file:
     path: variables.json
@@ -71,7 +132,10 @@
     - { line: '    "SSH_USER": "ubuntu",' }
     - { line: '    "AWS_OWNER_ID": "{{ AWS_OWNER_ID }}",' }
     - { line: '    "AMI_NAME": "{{ AMI_NAME }}",'}
-    - { line: '    "AMI_ID": "..."' }
+    - { line: '    "AMI_ID": "...",' }
+    - { line: '    "SRC_AMI_NAME": "{{ SRC_AMI_NAME }}",'}
+    - { line: '    "SRC_AMI_ID": "{{ SRC_AMI_ID }}",' }
+    - { line: '    "SRC_AMI_OWNER_ID": "{{ SRC_AMI_OWNER_ID }}"' }
     - { line: '}' }
   when: not variables.stat.exists
 
