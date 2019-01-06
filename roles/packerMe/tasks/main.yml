@@ -25,24 +25,10 @@
   debug:
     msg: "Created AMI: {{ ami_id[0].split(':')[1] }}"
 
-- name: Setup terraform file
+- name: Setup variables.json
   replace:
     path: variables.json
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
     - { regexp: "    \"AMI_ID\".*", replace: "    \"AMI_ID\": \"{{ ami_id[0].split(':')[1] }}\"" }
-    # - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
-
-# TODO: Future use
-# - name: Setup terraform file
-#   replace:
-#     path: roles/terraformDeploy/files/terraform.tfvars
-#     regexp: "{{ item.regexp }}"
-#     replace: "{{ item.replace }}"
-#   with_items:
-#     - { regexp: "{{ ami_id[0].split(':')[0] }} = \"ami-.*\"", replace: "{{ ami_id[0].split(':')[0] }} = \"{{ ami_id[0].split(':')[1] }}\"" }
-#     - { regexp: "INSTANCE_SIZE = \".*\"", replace: "INSTANCE_SIZE = \"{{ AWS_INSTANCE_SIZE }}\"" }
-#     - { regexp: "AWS_PROFILE = \".*\"", replace: "AWS_PROFILE = \"{{ AWS_PROFILE }}\"" }
-#     - { regexp: "AWS_REGION = \".*\"", replace: "AWS_REGION = \"{{ AWS_REGION }}\"" }
-#     - { regexp: "availability_zones   = \\[.*\\]\"", replace: "availability_zones   = \\[{{ AWS_AVAILABILITY_ZONES }}\\]\"" }
