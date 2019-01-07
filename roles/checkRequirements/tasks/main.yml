@@ -27,17 +27,28 @@
 
 - name: "Ensure required variables are set"
   fail:
-    msg: "The {{item}} variable is not defined"
+    msg: "The {{ item }} variable is undefined"
   when: vars[item] is undefined
   loop:
   - AWS_REGION
   - AWS_PROFILE
   - AWS_INSTANCE_SIZE
-  - AWS_OWNER_ID
   - AMI_NAME
-  - SSH_USER
-  - OS_FAMILY
-  - OS_VERSION
+  # - AWS_OWNER_ID
+
+- name: "Ensure OS_FAMILY is set when OS_VERSION is defined"
+  fail:
+    msg: "The {{ item }} variable is undefined"
+  when: (OS_FAMILY is defined) and (OS_VERSION is undefined)
+  loop:
+    - OS_VERSION
+
+- name: "Ensure OS_VERSION is set when OS_FAMILY is defined"
+  fail:
+    msg: "The {{ item }} variable is undefined"
+  when: (OS_VERSION is defined) and (OS_FAMILY is undefined)
+  loop:
+    - OS_FAMILY
 
 - debug: 
     msg: "I'm expecting to have AWS-CLI and MFA setup correctly on build machine"

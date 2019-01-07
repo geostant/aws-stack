@@ -13,6 +13,16 @@
     msg: "variables.json exist, NOT going to populate the file or overwrite variables"
   when: variables.stat.exists
 
+- set_fact:
+    OS_FAMILY: "ubuntu"
+    OS_VERSION: "16.04"
+    SSH_USER: "ubuntu"
+  when: (OS_FAMILY is undefined)
+
+- set_fact:
+    SSH_USER: "ubuntu"
+  when: (OS_FAMILY is defined) and (OS_VERSION is defined) and (SSH_USER is undefined)
+
 - name: Get AWS regions
   shell: 'aws --profile="{{ AWS_PROFILE }}" --region="{{ AWS_REGION }}" ec2 describe-regions'
   register: regions_out

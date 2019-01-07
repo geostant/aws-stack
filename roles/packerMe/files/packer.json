@@ -21,6 +21,8 @@
       "tags": {
         "OS_FAMILY": "{{ user `OS_FAMILY` }}",
         "OS_VERSION": "{{ user `OS_VERSION` }}",
+        "KERNEL_VERSION": "{{ user `KERNEL_VERSION` }}",
+        "DOCKER_VERSION": "{{ user `DOCKER_VERSION` }}",
         "Builder": "packerMe"
       }
     }
@@ -44,7 +46,9 @@
     "SRC_AMI_OWNER_ID": "{{ env `SRC_AMI_OWNER_ID` }}",
     "SSH_USER": "{{ env `SSH_USER` }}",
     "OS_FAMILY": "{{ env `OS_FAMILY` }}",
-    "OS_VERSION": "{{ env `OS_VERSION` }}"
+    "OS_VERSION": "{{ env `OS_VERSION` }}",
+    "KERNEL_VERSION": "{{ env `KERNEL_VERSION` }}",
+    "DOCKER_VERSION": "{{ env `DOCKER_VERSION` }}"
   },
   "post-processors": [
     {
