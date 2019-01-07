@@ -1,6 +1,4 @@
----
-- name: Provision Python
-  hosts: all
+- hosts: all
   gather_facts: no
   become: true
   tasks:

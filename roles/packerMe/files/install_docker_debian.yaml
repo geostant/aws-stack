@@ -1,0 +1,52 @@
+---
+- name: clean up
+  apt:
+    name: ['docker', 'docker-engine', 'docker.io', 'containerd', 'runc']
+    state: absent
+
+- name: specific for 14.04
+  apt:
+    name: ['linux-image-extra-{{ ansible_kernel }}', 'linux-image-extra-virtual']
+    state: present
+    update_cache: yes
+  when: ansible_lsb.release == "14.04"
+
+- name: Install missing dependencies
+  apt:
+    name: ['apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common']
+    state: present
+    update_cache: yes
+
+- name: Add docker Apt signing key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    state: present
+
+- name: Install latest docker version (when no version specified)
+  package:
+    name: docker-ce
+    state: present
+  when: DOCKER_VERSION is undefined
+
+- name: Install version specific docker-ce
+  package:
+    name: "docker-ce={{ DOCKER_VERSION }}"
+    state: present
+  when: (DOCKER_VERSION is defined) and (DOCKER_VERSION != "") and (DOCKER_VERSION != "latest")
+
+- name: Install latest docker-ce
+  package:
+    name: "docker-ce"
+    state: present
+  when: (DOCKER_VERSION is undefined) or (DOCKER_VERSION == "") or (DOCKER_VERSION == "latest") 
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_env.SUDO_USER }}"
+    groups: docker
+    append: yes
+  

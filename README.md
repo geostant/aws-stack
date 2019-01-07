@@ -92,7 +92,9 @@ If the file is absent, ansible will create one for you:
     "AMI_ID": "ami-...",
     "SRC_AMI_NAME": "...",
     "SRC_AMI_ID": "...",
-    "SRC_AMI_OWNER_ID": "..."
+    "SRC_AMI_OWNER_ID": "...",
+    "KERNEL_VERSION": "...",
+    "DOCKER_VERSION": "..."
 }
 
 ```

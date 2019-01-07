@@ -1,0 +1,8 @@
+- hosts: all
+  become: true
+  tasks:
+    - include_tasks: install_docker_debian.yaml
+      when: '"Debian" in ansible_os_family'
+
+    # - include_tasks: install_docker_rhel.yaml
+    #   when: '"rhel"|lower in OS_FAMILY|lower'

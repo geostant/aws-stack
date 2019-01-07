@@ -34,6 +34,10 @@
     },
     {
       "type": "ansible",
+      "playbook_file": "roles/packerMe/files/install_docker.yaml"
+    },
+    {
+      "type": "ansible",
       "playbook_file": "roles/packerMe/files/install_nfs.yaml"
     }
   ],
