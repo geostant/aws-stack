@@ -30,11 +30,19 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "roles/packerMe/files/install_python.yaml"
+      "playbook_file": "roles/packerMe/files/install_python.yaml",
+      "extra_arguments": [
+        "--extra-vars",
+        "OS_FAMILY={{user `OS_FAMILY`}}"
+      ]
     },
     {
       "type": "ansible",
-      "playbook_file": "roles/packerMe/files/install_docker.yaml"
+      "playbook_file": "roles/packerMe/files/install_docker.yaml",
+      "extra_arguments": [
+        "--extra-vars",
+        "AWS_REGION={{user `AWS_REGION`}}"
+      ]
     },
     {
       "type": "ansible",

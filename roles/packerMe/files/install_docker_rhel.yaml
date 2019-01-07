@@ -1,0 +1,46 @@
+---
+- name: clean up
+  yum:
+    name: ['docker', 'docker-engine', 'docker-client', 'docker-client-latest', 'docker-common', 'docker-latest', 'docker-latest-logrotate', 'docker-logrotate', 'docker-selinux', 'docker-engine-selinux']
+    state: absent
+
+- name: Install missing dependencies
+  yum:
+    name: ['yum-utils', 'device-mapper-persistent-data', 'lvm2']
+    state: present
+
+- name: Add docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+
+- name: Enable RHEL extras repository
+  shell: yum-config-manager --enable rhel-7-server-extras-rpms
+
+- name: Enable AWS RHEL extras repository
+  shell: "yum-config-manager --enable rhui-REGION-rhel-server-extras"
+
+- name: Install latest docker version (when no version specified)
+  package:
+    name: docker-ce
+    state: present
+  when: DOCKER_VERSION is undefined
+
+- name: Install version specific docker-ce
+  package:
+    name: "docker-ce={{ DOCKER_VERSION }}"
+    state: present
+  when: (DOCKER_VERSION is defined) and (DOCKER_VERSION != "") and (DOCKER_VERSION != "latest")
+
+- name: Install latest docker-ce
+  package:
+    name: "docker-ce"
+    state: present
+  when: (DOCKER_VERSION is undefined) or (DOCKER_VERSION == "") or (DOCKER_VERSION == "latest") 
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_env.SUDO_USER }}"
+    groups: docker
+    append: yes
+  

@@ -2,7 +2,7 @@
   become: true
   tasks:
     - include_tasks: install_docker_debian.yaml
-      when: '"Debian" in ansible_os_family'
+      when: '"debian" in ansible_os_family|lower'
 
-    # - include_tasks: install_docker_rhel.yaml
-    #   when: '"rhel"|lower in OS_FAMILY|lower'
+    - include_tasks: install_docker_rhel.yaml
+      when: '"redhat" in ansible_os_family|lower'
